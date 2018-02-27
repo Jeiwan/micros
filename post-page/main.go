@@ -22,7 +22,6 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := postClient.ListPosts(context.Background(), &postpb.ListRequest{})
 	if err != nil {
-		log.Panic(err)
 		render.Text(w, http.StatusServiceUnavailable, err.Error())
 		return
 	}
