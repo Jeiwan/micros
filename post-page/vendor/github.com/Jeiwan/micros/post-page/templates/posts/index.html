@@ -1,0 +1,15 @@
+<h1>Posts</h1>
+
+<ul>
+    {{ range . }}
+        <li>
+            <a href="/posts/{{.Id}}">
+                <strong>{{.Title}}</strong> by <em>{{.Author}}</em>
+            </a>
+        </li>
+    {{ end }}
+</ul>
+
+<br>
+<br>
+<a href="/posts/new">New post</a>

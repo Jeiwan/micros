@@ -7,8 +7,11 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 
 	pb "github.com/Jeiwan/micros/post/proto/post"
+	"github.com/hashicorp/consul/api"
+	uuid "github.com/satori/go.uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -84,13 +87,36 @@ func (s *service) GetPost(ctx context.Context, req *pb.GetRequest) (*pb.Response
 func main() {
 	storage := &postStorage{}
 
-	host := os.Getenv("HOST")
+	host := os.Getenv("HOSTNAME")
 	port := os.Getenv("PORT")
+	portInt, err := strconv.Atoi(port)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	consul, err := api.NewClient(api.DefaultConfig())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	serviceReg := &api.AgentServiceRegistration{
+		ID:      fmt.Sprintf("post-%s", uuid.NewV4().String()),
+		Name:    "post",
+		Tags:    []string{},
+		Address: host,
+		Port:    portInt,
+	}
+
+	err = consul.Agent().ServiceRegister(serviceReg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer consul.Agent().ServiceDeregister(serviceReg.ID)
 
 	s := grpc.NewServer()
 

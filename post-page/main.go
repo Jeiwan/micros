@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/go-chi/chi"
+	"github.com/hashicorp/consul/api"
 	"github.com/unrolled/render"
 
 	postpb "github.com/Jeiwan/micros/post/proto/post"
@@ -82,10 +82,32 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	host := os.Getenv("POST_HOST")
-	port := os.Getenv("POST_PORT")
+	var postService *api.AgentService
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", host, port), grpc.WithInsecure())
+	consul, err := api.NewClient(api.DefaultConfig())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	services, err := consul.Agent().Services()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, service := range services {
+		if service.Service == "post" {
+			postService = service
+			break
+		}
+	}
+
+	if postService == nil {
+		log.Fatal("'post' service is not found in Consul")
+	}
+
+	serviceAddress := fmt.Sprintf("%s:%d", postService.Address, postService.Port)
+	fmt.Println(serviceAddress)
+	conn, err := grpc.Dial(serviceAddress, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
