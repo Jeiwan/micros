@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/go-chi/chi"
@@ -21,7 +22,8 @@ func postsHandler(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := postClient.ListPosts(context.Background(), &postpb.ListRequest{})
 	if err != nil {
-		render.Text(w, http.StatusServiceUnavailable, "Uh-oh")
+		log.Panic(err)
+		render.Text(w, http.StatusServiceUnavailable, err.Error())
 		return
 	}
 
@@ -81,7 +83,10 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	conn, err := grpc.Dial("localhost:31337", grpc.WithInsecure())
+	host := os.Getenv("POST_HOST")
+	port := os.Getenv("POST_PORT")
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", host, port), grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,7 +102,7 @@ func main() {
 	r.Post("/posts", createPostHandler)
 	r.Get("/posts/{post-id}", postHandler)
 
-	fmt.Println("Starting the server...")
+	fmt.Println("Starting the HTTP server")
 	http.ListenAndServe(":8080", r)
 }
 

@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net"
+	"os"
 
 	pb "github.com/Jeiwan/micros/post/proto/post"
 	"google.golang.org/grpc"
@@ -82,7 +84,10 @@ func (s *service) GetPost(ctx context.Context, req *pb.GetRequest) (*pb.Response
 func main() {
 	storage := &postStorage{}
 
-	lis, err := net.Listen("tcp", ":31337")
+	host := os.Getenv("HOST")
+	port := os.Getenv("PORT")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,6 +98,7 @@ func main() {
 
 	reflection.Register(s)
 
+	fmt.Println("Starting the gRPC server on", fmt.Sprintf("%s:%s", host, port))
 	if err := s.Serve(lis); err != nil {
 		log.Fatal(err)
 	}

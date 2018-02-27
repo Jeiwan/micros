@@ -7,5 +7,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o micro_post_page .
 
 FROM alpine:3.7
 RUN apk --no-cache add ca-certificates
-COPY --from=builder /go/src/github.com/Jeiwan/micros/post-page/micro_post_page /usr/local/bin
-CMD ["micro_post_page"]
+WORKDIR /go/src/github.com/Jeiwan/micros/post-page/
+COPY templates ./templates
+COPY --from=builder /go/src/github.com/Jeiwan/micros/post-page/micro_post_page .
+CMD ["./micro_post_page"]
