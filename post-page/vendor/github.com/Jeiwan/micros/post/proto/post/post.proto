@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package go.micors.srv.post;
+
+service PostService {
+    rpc CreatePost(Post) returns (Response) {}
+
+    rpc ListPosts(ListRequest) returns (Response) {}
+
+    rpc GetPost(GetRequest) returns (Response) {}
+}
+
+message Post {
+    int64 id = 4;
+    string title = 1;
+    string text = 2;
+    string author = 3;
+}
+
+message ListRequest {}
+
+message GetRequest {
+    int64 PostID = 1;
+}
+
+message Response {
+    bool status = 1;
+    Post post = 2;
+    repeated Post posts = 3;
+}
