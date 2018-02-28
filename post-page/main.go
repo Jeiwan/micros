@@ -8,10 +8,10 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	"github.com/hashicorp/consul/api"
 	"github.com/unrolled/render"
 
 	postpb "github.com/Jeiwan/micros/post/proto/post"
+	wonaming "github.com/wothing/wonaming/consul"
 	"google.golang.org/grpc"
 )
 
@@ -82,32 +82,9 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var postService *api.AgentService
-
-	consul, err := api.NewClient(api.DefaultConfig())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	services, err := consul.Agent().Services()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, service := range services {
-		if service.Service == "post" {
-			postService = service
-			break
-		}
-	}
-
-	if postService == nil {
-		log.Fatal("'post' service is not found in Consul")
-	}
-
-	serviceAddress := fmt.Sprintf("%s:%d", postService.Address, postService.Port)
-	fmt.Println(serviceAddress)
-	conn, err := grpc.Dial(serviceAddress, grpc.WithInsecure())
+	resolver := wonaming.NewResolver("post")
+	balancer := grpc.RoundRobin(resolver)
+	conn, err := grpc.Dial("", grpc.WithInsecure(), grpc.WithBalancer(balancer))
 	if err != nil {
 		log.Fatal(err)
 	}

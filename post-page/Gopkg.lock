@@ -57,6 +57,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/wothing/wonaming"
+  packages = ["consul","lib"]
+  revision = "6c788e194356a714698e21ce75b3f2663cb38a7b"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
   revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
@@ -82,6 +88,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "12784258eae9503d5da99a1dbbb5901af8089cef309d0154f6b1d6e6af5b09ac"
+  inputs-digest = "c6775fc9435418b350f44414907681b8e5431fd75f45b8ded1eaa74585da1279"
   solver-name = "gps-cdcl"
   solver-version = 1
